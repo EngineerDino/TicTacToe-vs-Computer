@@ -5,8 +5,15 @@ public class Main {
 
 
     public static void main(String[] args) {
-        Game game = new Game();
-        game.playGame();
+        while(true) {
+            Game game = new Game();
+            if (!game.settings()) {
+                break;
+            } else {
+                game.playGame();
+            }
+        }
+
     }
 }
 

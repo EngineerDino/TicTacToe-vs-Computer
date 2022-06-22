@@ -1,21 +1,28 @@
 package tictactoe;
 
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Random;
 
 public class Game {
     String[][] board = {{"_", "_", "_"}, {"_", "_", "_"}, {"_", "_", "_"}};
+
+    final String[] OPTIONS = {"user", "easy"};
     String status = "Not finished";
     int activePlayer = 0;
-    int[] players = {0, 1}; // 0 is the human, 1 is the "easy" AI, in future there will be 2 and 3...
+    String[] players = {"user", "easy"}; //
     String[] symbols = {"X", "O"};
 
+
+    public void setPlayers(String[] players) {
+        this.players = players;
+    }
     private void makeMove() {
         switch (players[activePlayer]) {
-            case 0:
+            case "user":
                 playerMove(symbols[activePlayer]);
                 break;
-            case 1:
+            case "easy":
                 randomMove(symbols[activePlayer]);
                 break;
             default:
@@ -111,6 +118,43 @@ public class Game {
         }
     }
 
+
+    public boolean settings() {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.print("Input command:");
+            String[] inputs = scanner.nextLine().split(" ");
+
+            switch (evalInput(inputs)) {
+                case 0:
+                    return false;
+                case 1:
+                    System.out.println("Bad parameters!");
+                    continue;
+                case 2:
+                    setPlayers(Arrays.copyOfRange(inputs, 1, 3));
+                    return true;
+            }
+            //this line of code should never be reached :D
+        }
+    }
+
+    private int evalInput(String[] inputs) {
+        if ("exit".equals(inputs[0])) {
+            return 0;
+        } else if (inputs.length != 3 || !"start".equals(inputs[0])) {
+            return 1;
+        }
+        //now we for sure are left with inputs that contain start plus 2 more strings.
+        // check if the next two words are element of the "allowed" keywords defined in the final field "options"
+        if (Arrays.asList(this.OPTIONS).contains(inputs[1]) && Arrays.asList(this.OPTIONS).contains(inputs[2])) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+
     public void playGame() {
         printBoard();
         while (status.equals("Not finished")) {
@@ -122,3 +166,7 @@ public class Game {
         System.out.println(status);
     }
 }
+
+
+
+
