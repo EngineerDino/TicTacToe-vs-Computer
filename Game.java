@@ -1,5 +1,6 @@
 package tictactoe;
 
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Random;
@@ -7,7 +8,7 @@ import java.util.Random;
 public class Game {
     String[][] board = {{"_", "_", "_"}, {"_", "_", "_"}, {"_", "_", "_"}};
 
-    final String[] OPTIONS = {"user", "easy"};
+    final String[] OPTIONS = {"user", "easy", "medium"};
     String status = "Not finished";
     int activePlayer = 0;
     String[] players = {"user", "easy"}; //
@@ -20,17 +21,20 @@ public class Game {
     private void makeMove() {
         switch (players[activePlayer]) {
             case "user":
-                playerMove(symbols[activePlayer]);
+                playerMove();
                 break;
             case "easy":
-                randomMove(symbols[activePlayer]);
+                easyMove();
+                break;
+            case "medium":
+                mediumMove();
                 break;
             default:
                 System.out.println("Something went wrong!");
                 break;
         }
     }
-    private void playerMove(String symbol) {
+    private void playerMove() {
         Scanner scanner = new Scanner(System.in);
         boolean isInteger;
         int rowInput;
@@ -52,7 +56,7 @@ public class Game {
             } else if (!board[rowInput - 1][colInput - 1].equals("_")) {
                 System.out.println("This cell is occupied! Choose another one!");
             } else {
-                board[rowInput - 1][colInput - 1] = symbol;
+                board[rowInput - 1][colInput - 1] = symbols[activePlayer];
                 break;
             }
             //Make sure the scanner reads the whole line such that he is done and "reset" for the next run of the loop
@@ -61,60 +65,42 @@ public class Game {
         }
     }
 
-    private void randomMove(String symbol) {
-        Random rand = new Random();
-        int freeSlots = countFreeSlots();
-        int randomMove = rand.nextInt(freeSlots) + 1;
+    private void easyMove() {
         System.out.println("Making move level \"easy\"");
+        randomMove();
+    }
+    private void mediumMove() {
+        int[] danger = BoardMaths.dangerSlot(board, symbols[(activePlayer+1) % 2]);
+        int[] winMove = BoardMaths.dangerSlot(board, symbols[activePlayer]);
+        System.out.println("Making move level \"medium\"");
+        // -1 is the standard value that the method dangerSlot returns for both coordinates if there are no 2 in a row
+        //First we check, if AI can win - if so, it does it.
+        //Next we check if there is a danger, if so it neutralizes it.
+        //If none of the above hold true, it makes a random move.
+        if (winMove[0] != -1) {
+            this.board[winMove[0]][winMove[1]] = symbols[activePlayer];
+            return;
+        }
+        if (danger[0] == -1) {
+            randomMove();
+        } else {
+            this.board[danger[0]][danger[1]] = symbols[activePlayer];
+        }
+    }
+    private void randomMove() {
+        Random rand = new Random();
+        int freeSlots = BoardMaths.countFreeSlots(this.board);
+        int randomMove = rand.nextInt(freeSlots) + 1;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (board[i][j].equals("_")) {
                     randomMove -= 1;
                 }
                 if (randomMove == 0) {
-                    board[i][j] = symbol;
+                    board[i][j] = symbols[activePlayer];
                     return;
                 }
             }
-        }
-    }
-
-    private int countFreeSlots() {
-        int counter = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                counter += board[i][j].equals("_") ? 1 : 0;
-            }
-        }
-        return counter;
-    }
-
-    private void printBoard() {
-        System.out.println("---------");
-        for (int i = 0; i < 3; i++) {
-            System.out.print("|");
-            for (int j = 0; j < 3; j++) {
-                System.out.print(" " + board[i][j]);
-            }
-            System.out.print(" |" + "\n");
-        }
-        System.out.println("---------");
-    }
-
-    private void checkBoard() {
-        String wCheck = " ";
-        // Save all rows and columns and diagonals in one string, separated by "-".
-        for (int i = 0; i < 3; i++) {
-            wCheck += board[i][0] + board[i][1] + board[i][2] + "-" + board[0][i] + board[1][i] + board[2][i] + "-";
-        }
-        wCheck += board[0][0] + board[1][1] + board[2][2] + "-" + board[0][2] + board[1][1] + board[2][0];
-
-        if (wCheck.contains("XXX")) {
-            status = "X wins";
-        } else if (wCheck.contains("OOO")) {
-            status = "O wins";
-        } else if (!wCheck.contains("_")) {
-            status = "Draw";
         }
     }
 
@@ -124,7 +110,7 @@ public class Game {
 
         while (true) {
             System.out.print("Input command:");
-            String[] inputs = scanner.nextLine().split(" ");
+            String[] inputs = scanner.nextLine().strip().split(" ");
 
             switch (evalInput(inputs)) {
                 case 0:
@@ -156,17 +142,23 @@ public class Game {
     }
 
     public void playGame() {
-        printBoard();
+        BoardMaths.printBoard(this.board);
         while (status.equals("Not finished")) {
             makeMove();
+            // This is a formula to switch between 0 and 1.
             activePlayer = (activePlayer + 1) % 2;
-            printBoard();
-            checkBoard();
+            BoardMaths.printBoard(this.board);
+            this.status = BoardMaths.checkBoard(this.board);
+
         }
-        System.out.println(status);
+        System.out.println(this.status);
+
     }
 }
 
 
 
+
+// TODO: Make a class Player and then subclasses Computer and Human that override the method makeMove().
+// Or an interface Player which has to have an absract calls makeMove and the static class randomMove
 
