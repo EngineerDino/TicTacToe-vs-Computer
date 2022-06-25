@@ -3,14 +3,13 @@ package tictactoe;
 
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.Random;
 
 public class Game {
     String[][] board = {{"_", "_", "_"}, {"_", "_", "_"}, {"_", "_", "_"}};
 
-    String[] symbols = {"L", "O"};
+    String[] symbols = {"X", "O"};
 
-    final String[] OPTIONS = {"user", "easy", "medium"};
+    final String[] OPTIONS = {"user", "easy", "medium", "hard"};
     String status = "Not finished";
     int activePlayer = 0;
     Player[] players = new Player[2];
@@ -28,6 +27,9 @@ public class Game {
                     break;
                 case "medium":
                     this.players[i] = new MediumAi(symbols[i], symbols[(i + 1) % 2]);
+                    break;
+                case "hard":
+                    this.players[i] = new HardAi(symbols[i], symbols[(i + 1) % 2]);
                     break;
             }
         }
@@ -79,6 +81,7 @@ public class Game {
             activePlayer = (activePlayer + 1) % 2;
             BoardMaths.printBoard(this.board);
             this.status = BoardMaths.checkBoard(this.board);
+            int[][] free = BoardMaths.getFreeSlots(board);
 
         }
         System.out.println(this.status);

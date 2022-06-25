@@ -18,5 +18,4 @@ public class Main {
 }
 
 
-//TODO: Implement the hard level minimax algo
 

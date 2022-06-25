@@ -12,6 +12,31 @@ public class BoardMaths {
         return counter;
     }
 
+    public static int[][] getFreeSlots(String[][] board) {
+        int[][] freeSlots = new int[countFreeSlots(board)][2];
+        int counter = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if ("_".equals(board[i][j])) {
+                    freeSlots[counter][0] = i;
+                    freeSlots[counter][1] = j;
+                    counter += 1;
+                }
+            }
+        }
+        return freeSlots;
+    }
+
+    public static String[][] cloneBoard(String[][] board) {
+        String[][] cloned = new String[3][3];
+        for (int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                cloned[i][j] = board[i][j];
+            }
+        }
+        return cloned;
+    }
+
     public static void printBoard(String[][] board) {
         System.out.println("---------");
         for (int i = 0; i < 3; i++) {
@@ -23,6 +48,7 @@ public class BoardMaths {
         }
         System.out.println("---------");
     }
+
 
     public static String checkBoard(String[][] board) {
         String wCheck = checkString(board);
