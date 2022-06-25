@@ -1,6 +1,6 @@
 package tictactoe;
 
-import java.sql.SQLOutput;
+
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Random;
@@ -8,100 +8,30 @@ import java.util.Random;
 public class Game {
     String[][] board = {{"_", "_", "_"}, {"_", "_", "_"}, {"_", "_", "_"}};
 
+    String[] symbols = {"L", "O"};
+
     final String[] OPTIONS = {"user", "easy", "medium"};
     String status = "Not finished";
     int activePlayer = 0;
-    String[] players = {"user", "easy"}; //
-    String[] symbols = {"X", "O"};
+    Player[] players = new Player[2];
+
 
 
     public void setPlayers(String[] players) {
-        this.players = players;
-    }
-    private void makeMove() {
-        switch (players[activePlayer]) {
-            case "user":
-                playerMove();
-                break;
-            case "easy":
-                easyMove();
-                break;
-            case "medium":
-                mediumMove();
-                break;
-            default:
-                System.out.println("Something went wrong!");
-                break;
-        }
-    }
-    private void playerMove() {
-        Scanner scanner = new Scanner(System.in);
-        boolean isInteger;
-        int rowInput;
-        int colInput;
-        while(true) {
-            System.out.print("Enter the coordinates:");
-
-            //Check if the next two Inputs are Integers and if so, save them.
-            isInteger = scanner.hasNextInt();
-            rowInput = isInteger ? scanner.nextInt() : 0;
-            isInteger = scanner.hasNextInt();
-            colInput = isInteger ? scanner.nextInt() : 0;
-
-            //Check for all kinds of wrong input and save the symbol in the board if everything is ok.
-            if (!isInteger) {
-                System.out.println("You should enter numbers!");
-            } else if (rowInput > 3 || rowInput < 1 || colInput > 3 || colInput < 1) {
-                System.out.println("Coordinates should be from 1 to 3!");
-            } else if (!board[rowInput - 1][colInput - 1].equals("_")) {
-                System.out.println("This cell is occupied! Choose another one!");
-            } else {
-                board[rowInput - 1][colInput - 1] = symbols[activePlayer];
-                break;
-            }
-            //Make sure the scanner reads the whole line such that he is done and "reset" for the next run of the loop
-            scanner.nextLine();
-            //End of  infinite while to post one Symbol
-        }
-    }
-
-    private void easyMove() {
-        System.out.println("Making move level \"easy\"");
-        randomMove();
-    }
-    private void mediumMove() {
-        int[] danger = BoardMaths.dangerSlot(board, symbols[(activePlayer+1) % 2]);
-        int[] winMove = BoardMaths.dangerSlot(board, symbols[activePlayer]);
-        System.out.println("Making move level \"medium\"");
-        // -1 is the standard value that the method dangerSlot returns for both coordinates if there are no 2 in a row
-        //First we check, if AI can win - if so, it does it.
-        //Next we check if there is a danger, if so it neutralizes it.
-        //If none of the above hold true, it makes a random move.
-        if (winMove[0] != -1) {
-            this.board[winMove[0]][winMove[1]] = symbols[activePlayer];
-            return;
-        }
-        if (danger[0] == -1) {
-            randomMove();
-        } else {
-            this.board[danger[0]][danger[1]] = symbols[activePlayer];
-        }
-    }
-    private void randomMove() {
-        Random rand = new Random();
-        int freeSlots = BoardMaths.countFreeSlots(this.board);
-        int randomMove = rand.nextInt(freeSlots) + 1;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (board[i][j].equals("_")) {
-                    randomMove -= 1;
-                }
-                if (randomMove == 0) {
-                    board[i][j] = symbols[activePlayer];
-                    return;
-                }
+        for(int i = 0; i < 2; i++) {
+            switch(players[i]) {
+                case "user":
+                    this.players[i] = new Human(symbols[i]);
+                    break;
+                case "easy":
+                    this.players[i] = new EasyAi(symbols[i]);
+                    break;
+                case "medium":
+                    this.players[i] = new MediumAi(symbols[i], symbols[(i + 1) % 2]);
+                    break;
             }
         }
+
     }
 
 
@@ -144,7 +74,7 @@ public class Game {
     public void playGame() {
         BoardMaths.printBoard(this.board);
         while (status.equals("Not finished")) {
-            makeMove();
+            players[activePlayer].makeMove(this.board);
             // This is a formula to switch between 0 and 1.
             activePlayer = (activePlayer + 1) % 2;
             BoardMaths.printBoard(this.board);
@@ -159,6 +89,5 @@ public class Game {
 
 
 
-// TODO: Make a class Player and then subclasses Computer and Human that override the method makeMove().
-// Or an interface Player which has to have an absract calls makeMove and the static class randomMove
+
 
