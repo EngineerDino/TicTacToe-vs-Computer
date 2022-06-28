@@ -66,19 +66,20 @@ public class BoardMaths {
 
     //This is the main tool to check for the status of the board. I return all rows, columns and two diagonals in one string
     // Always separated by a "-". Now I can check this string for all kinds of occurrences (XXX or OO_ etc.)
+
     private static String checkString(String[][] board) {
-        String wCheck = " ";
+        StringBuilder wCheck = new StringBuilder();
         for (int i = 0; i < 3; i++) {
-            wCheck += board[i][0] + board[i][1] + board[i][2] + "-";
+            wCheck.append(board[i][0]).append(board[i][1]).append(board[i][2]).append("-");
         }
         for (int i = 0; i < 3; i++) {
-            wCheck += board[0][i] + board[1][i] + board[2][i] + "-";
+            wCheck.append(board[0][i]).append(board[1][i]).append(board[2][i]).append("-");
         }
-        wCheck += board[0][0] + board[1][1] + board[2][2] + "-" + board[0][2] + board[1][1] + board[2][0];
+        wCheck.append(board[0][0]).append(board[1][1]).append(board[2][2]).append("-");
+        wCheck.append(board[0][2]).append(board[1][1]).append(board[2][0]);
 
-        return wCheck;
+        return wCheck.toString();
     }
-
     public static int[] dangerSlot(String[][] board, String symbol) {
         String check = BoardMaths.checkString(board);
         String[] dangerStrings = {"_" + symbol + symbol, symbol + "_" + symbol, symbol + symbol + "_"};
